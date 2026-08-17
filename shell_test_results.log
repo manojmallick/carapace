@@ -1,45 +1,51 @@
 Shell Test: starting continuous memory read loop (1 read/sec)...
-01:59:13 -- OK      39.7ms  rows=1  via_node=1
-01:59:14 -- OK      25.2ms  rows=1  via_node=1
-01:59:15 -- OK      21.4ms  rows=1  via_node=1
-01:59:16 -- OK      30.9ms  rows=1  via_node=1
-01:59:18 -- OK      21.0ms  rows=1  via_node=1
-01:59:19 -- OK      27.8ms  rows=1  via_node=1
-01:59:20 -- OK      24.5ms  rows=1  via_node=1
+02:46:33 -- OK      45.7ms  rows=1  via_node=1
+02:46:35 -- OK      23.0ms  rows=1  via_node=1
+02:46:36 -- OK      21.3ms  rows=1  via_node=1
+02:46:37 -- OK      21.9ms  rows=1  via_node=1
+02:46:39 -- OK      21.5ms  rows=1  via_node=1
+02:46:40 -- OK      21.5ms  rows=1  via_node=1
+02:46:41 -- OK      21.1ms  rows=1  via_node=1
 
-01:59:21 -- Shell Test: SIGKILL node 2 (pid 72739). No drain, no grace.
-01:59:21 -- node 2 is dead. Reads continuing against nodes 1 and 3...
-01:59:21 -- OK      22.0ms  rows=1  via_node=1
-01:59:22 -- OK      21.8ms  rows=1  via_node=1
-01:59:24 -- OK      21.2ms  rows=1  via_node=1
-01:59:25 -- OK      26.9ms  rows=1  via_node=1
-01:59:26 -- OK      21.7ms  rows=1  via_node=1
-01:59:27 -- OK      24.4ms  rows=1  via_node=1
-01:59:28 -- OK      21.8ms  rows=1  via_node=1
-01:59:30 -- OK      21.8ms  rows=1  via_node=1
-01:59:31 -- OK      21.6ms  rows=1  via_node=1
-01:59:32 -- OK      21.1ms  rows=1  via_node=1
-01:59:33 -- OK      27.1ms  rows=1  via_node=1
-01:59:34 -- OK      68.5ms  rows=1  via_node=1
-01:59:36 -- OK      23.5ms  rows=1  via_node=1
-01:59:37 -- OK      21.3ms  rows=1  via_node=1
-01:59:38 -- OK      21.0ms  rows=1  via_node=1
-01:59:39 -- OK      21.6ms  rows=1  via_node=1
-01:59:41 -- OK      24.0ms  rows=1  via_node=1
-01:59:42 -- OK      22.2ms  rows=1  via_node=1
-01:59:43 -- OK      21.4ms  rows=1  via_node=1
-01:59:44 -- OK      21.4ms  rows=1  via_node=1
-01:59:45 -- 
-01:59:46 -- Shell Test: restarting node 2...
-OK      21.1ms  rows=1  via_node=1
-01:59:47 -- OK      26.7ms  rows=1  via_node=1
-01:59:48 -- OK      20.9ms  rows=1  via_node=1
-01:59:49 -- OK      20.8ms  rows=1  via_node=1
-01:59:50 -- OK      21.4ms  rows=1  via_node=1
-01:59:52 -- OK      26.9ms  rows=1  via_node=1
-01:59:53 -- OK      28.9ms  rows=1  via_node=1
-01:59:54 -- OK      25.4ms  rows=1  via_node=1
-01:59:55 -- OK      26.0ms  rows=1  via_node=1
-01:59:56 -- OK      28.8ms  rows=1  via_node=1
+02:46:42 -- Shell Test: SIGKILL node 1 (pid 48777). No drain, no grace.
+02:46:42 -- node 1 is dead. Reads continuing against the survivors...
+02:46:42 -- FAIL  4056.5ms  OperationalError: connection failed: connection to server at "::1", port 26253 failed: could not receive data from server: Connection refused
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: '26251', hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 26251 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+- host: 'localhost', port: '26251', hostaddr: '::1': connection failed: connection to server at "::1", port 26251 failed: could not receive data from server: Connection refused
+- host: 'localhost', port: '26252', hostaddr: '127.0.0.1': connection timeout expired
+- host: 'localhost', port: '26252', hostaddr: '::1': connection failed: connection to server at "::1", port 26252 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+- host: 'localhost', port: '26253', hostaddr: '127.0.0.1': connection timeout expired
+- host: 'localhost', port: '26253', hostaddr: '::1': connection failed: connection to server at "::1", port 26253 failed: could not receive data from server: Connection refused
+02:46:47 -- OK     136.7ms  rows=1  via_node=3
+02:46:49 -- OK      24.6ms  rows=1  via_node=3
+02:46:50 -- OK      23.7ms  rows=1  via_node=3
+02:46:51 -- OK      24.3ms  rows=1  via_node=3
+02:46:52 -- OK      24.1ms  rows=1  via_node=3
+02:46:54 -- OK      23.8ms  rows=1  via_node=3
+02:46:55 -- OK      24.2ms  rows=1  via_node=3
+02:46:56 -- OK      23.2ms  rows=1  via_node=3
+02:46:57 -- OK      23.2ms  rows=1  via_node=3
+02:46:58 -- OK      23.8ms  rows=1  via_node=3
+02:47:00 -- OK      24.0ms  rows=1  via_node=3
+02:47:01 -- OK      25.6ms  rows=1  via_node=3
+02:47:02 -- OK      23.1ms  rows=1  via_node=3
+02:47:03 -- OK      23.5ms  rows=1  via_node=3
+02:47:04 -- OK      22.1ms  rows=1  via_node=3
+02:47:06 -- OK      23.6ms  rows=1  via_node=3
 
-Shell Test complete: 36 probe reads, 0 failed. Full log: shell_test_results.log
+02:47:07 -- Shell Test: restarting node 1...
+02:47:07 -- OK      32.6ms  rows=1  via_node=3
+02:47:08 -- OK     122.3ms  rows=1  via_node=1
+02:47:09 -- OK      27.6ms  rows=1  via_node=1
+02:47:11 -- OK      32.7ms  rows=1  via_node=1
+02:47:12 -- OK      25.6ms  rows=1  via_node=1
+02:47:13 -- OK      26.7ms  rows=1  via_node=1
+02:47:14 -- OK      28.3ms  rows=1  via_node=1
+02:47:15 -- OK      27.1ms  rows=1  via_node=1
+02:47:17 -- OK      30.3ms  rows=1  via_node=1
+02:47:18 -- OK      28.9ms  rows=1  via_node=1
+
+Shell Test complete: 34 probe reads, 1 failed. Full log: shell_test_results_node1.log

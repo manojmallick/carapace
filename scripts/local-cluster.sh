@@ -34,6 +34,9 @@ case "${1:-start}" in
     done
     echo "Cluster up. SQL: localhost:26251,26252,26253  UI: http://localhost:8081"
     ;;
+  restart-node)
+    start_node "${2:?usage: $0 restart-node <1|2|3>}"
+    ;;
   restart-node2)
     start_node 2
     ;;

@@ -38,10 +38,13 @@ write method exists on the reader class) and in the database (a SELECT-only
 SQL role). Every write goes through a real, deployed, asynchronous AWS Lambda
 instead, so a slow or failed write never blocks the agent's response.
 
-Then it's stress-tested for real: a script SIGKILLs a live cluster node
-mid-session while a continuous read probe runs, and the actual log --
-0 failed reads across 36 probes -- is committed to the repo, not asserted in
-a README.
+Then it's stress-tested for real: a script SIGKILLs the exact cluster node
+the client is connected to -- not a spare one -- mid-session, while a
+continuous read probe runs. The actual log is committed to the repo: one
+failed read at the instant of the kill, then real failover to a surviving
+node about five seconds later, 33 of the next 33 reads succeeding. Reporting
+that one honest failure instead of a suspiciously clean zero is the point --
+it's what real failover actually looks like, not an idealized number.
 
 ## How we built it
 

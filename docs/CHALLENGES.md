@@ -178,14 +178,50 @@ lets the same daemon thread finish before the process exits; the Shell
 Test log below was captured after populating memory this way, and
 shows `rows=1` throughout -- real data, not an empty table.
 
-## Shell Test result (real run, local 3-node cluster, `2026-08-18`)
+## Challenge 9: the first Shell Test never actually proved failover
 
-36 read-loop probes across the full kill/recovery window, SIGKILL'd node
-2 with no drain and no grace period, against a table populated with a
-real memory row (see Challenge 8 above -- an earlier run against an
-empty table is not what's reported here). **0 failed reads.** Full log
-committed at `shell_test_results.log`. Latency stayed in the 20-30ms
-band throughout, including the instant of the kill -- unsurprising
-given the client's multi-host connection string kept it pinned to node
-1, which was never touched; the meaningful result is that killing a
-node outright caused zero read failures, not a latency story.
+**What we assumed:** killing node 2 while the read probe ran (the
+original Shell Test) was sufficient evidence that the memory layer
+survives a node failure -- 0 failed reads across 36-37 probes,
+consistently.
+
+**What actually happened:** every single probe line in that log reads
+`via_node=1`, before, during, and after the kill -- because the
+client's multi-host connection string (`localhost:26251,...252,...253`)
+always connects to the first reachable host, and node 1 was never
+touched. The test proved an *idle, untouched node kept working*, which
+is trivially true and proves nothing about failover. That log is kept
+at `shell_test_results_node2.log` for the record, but it is not the
+headline evidence -- it isn't a rigorous resilience test.
+
+**The fix:** generalized `scripts/local-cluster.sh` (`restart-node
+<n>`) and `scripts/shell-test-local.sh` (now takes a target node
+number, second argument) to kill **node 1** instead -- the node the
+client actually depends on under normal conditions. That is the real
+test: does the client actually fail over to a surviving node, not just
+"does an unrelated node keep responding."
+
+## Shell Test result (real run, local 3-node cluster, kill node 1, `2026-08-18`)
+
+Real failover, not just an untouched node staying up. Full log
+committed at `shell_test_results.log`:
+
+- Before the kill: every read served via node 1 (`via_node=1`).
+- `02:46:42` -- SIGKILL node 1. The very next probe **failed** (the
+  only failure in the run): a 4056.5ms `OperationalError` showing
+  libpq walking all three hosts in the connection string and hitting
+  `Connection refused` on the now-dead node 1 and a `connection
+  timeout expired` reaching node 2, before the client gave up on that
+  attempt.
+- `02:46:47`, five seconds after the kill -- the next probe succeeds,
+  now served via node 3 (`via_node=3`). Every read for the rest of the
+  outage window is served via node 3.
+- `02:47:07` -- node 1 restarted; traffic reverts to `via_node=1` once
+  it rejoins.
+
+**34 probes, 1 failed (97% success including the failover transition
+itself), full recovery within ~5 seconds of the kill.** Reporting the
+one real failure instead of a suspiciously clean zero -- a distributed
+system failing over in a handful of seconds, once, at the exact
+instant a node dies, is a more credible resilience story than a
+zero-failure number that turns out not to have tested failover at all.

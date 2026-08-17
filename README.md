@@ -83,24 +83,26 @@ Reads: `AgentMemoryReader` &rarr; `carapace_reader` role (SELECT only) &rarr; Co
 
 ## Production readiness, verified not asserted
 
-`scripts/shell-test-local.sh` runs a continuous 1-read/sec probe against a real local 3-node CockroachDB cluster, `SIGKILL`s node 2 outright -- no drain, no grace period -- waits through the outage, restarts the node, and reports the real pass/fail count.
+`scripts/shell-test-local.sh` runs a continuous 1-read/sec probe against a real local 3-node CockroachDB cluster and `SIGKILL`s a node outright -- no drain, no grace period -- while it's running, waits through the outage, restarts the node, and reports the real pass/fail count. It kills **node 1 by default** -- the first host in the client's multi-host connection string, i.e. the one it actually depends on -- not an idle node that was never being used. (An earlier version of this test killed node 2 while node 1 stayed untouched; every read kept going through node 1 the whole time, which proved an unrelated node kept working, not that the client fails over. That log is kept at `shell_test_results_node2.log` for the record but isn't the evidence this README stands on -- see Challenge 9.)
 
 **Real result, committed at [`shell_test_results.log`](shell_test_results.log):**
 
 ```
-01:59:13 -- OK      39.7ms  rows=1  via_node=1
+02:46:33 -- OK      45.7ms  rows=1  via_node=1
 ...
-01:59:21 -- Shell Test: SIGKILL node 2 (pid 72739). No drain, no grace.
-01:59:21 -- node 2 is dead. Reads continuing against nodes 1 and 3...
-01:59:21 -- OK      22.0ms  rows=1  via_node=1
-... (0 failures across the entire outage window) ...
-01:59:46 -- Shell Test: restarting node 2...
-01:59:56 -- OK      28.8ms  rows=1  via_node=1
+02:46:42 -- Shell Test: SIGKILL node 1 (pid 48777). No drain, no grace.
+02:46:42 -- FAIL  4056.5ms  OperationalError: ... Connection refused (node 1) ...
+02:46:47 -- OK     136.7ms  rows=1  via_node=3   <- failed over, ~5s after the kill
+... (14 more reads, all via node 3, all OK) ...
+02:47:07 -- Shell Test: restarting node 1...
+02:47:08 -- OK     122.3ms  rows=1  via_node=1   <- reverted to node 1 once it recovered
 
-Shell Test complete: 36 probe reads, 0 failed.
+Shell Test complete: 34 probe reads, 1 failed.
 ```
 
-36 probes, 0 failures, real data (`rows=1`, not an empty table -- see Challenge 8 in the [challenges diary](docs/CHALLENGES.md)). `scripts/shell-test.sh` is the CockroachDB Cloud equivalent, built around the real `ccloud cluster disruption set/clear` API -- gated to Advanced-plan clusters with Cockroach Labs account-team enrollment, which wasn't obtainable inside the hackathon deadline. That decision, and why, is documented in full in [Challenge 7](docs/CHALLENGES.md) rather than hidden. The local cluster result is the honest evidence this submission stands on; everything else in the architecture (schema, roles, MCP boundary, Lambda write-back, Bedrock reasoning) is wired against the **real CockroachDB Cloud cluster**, not a local stand-in.
+**34 probes, 1 failure, real failover from node 1 to node 3 and back**, real data (`rows=1`, not an empty table -- see Challenge 8). The one failure lands at the exact instant of the kill, with the full libpq multi-host retry cascade visible in the error text -- and the very next probe, ~5 seconds later, succeeds via a different node. Reporting that one real failure instead of a suspiciously clean zero is the more credible result: a distributed system taking a few seconds to fail over once, at the moment a node actually dies, rather than a zero-failure number that (as `shell_test_results_node2.log` shows) turns out not to have tested failover at all.
+
+`scripts/shell-test.sh` is the CockroachDB Cloud equivalent, built around the real `ccloud cluster disruption set/clear` API -- gated to Advanced-plan clusters with Cockroach Labs account-team enrollment, which wasn't obtainable inside the hackathon deadline. That decision, and why, is documented in full in [Challenge 7](docs/CHALLENGES.md) rather than hidden. The local cluster result is the honest evidence this submission stands on; everything else in the architecture (schema, roles, MCP boundary, Lambda write-back, Bedrock reasoning) is wired against the **real CockroachDB Cloud cluster**, not a local stand-in.
 
 ## Benchmark
 
@@ -145,7 +147,7 @@ cockroach sql --insecure --host=localhost:26251 -e "CREATE DATABASE IF NOT EXIST
 CARAPACE_DB_ADMIN_URL="postgresql://root@localhost:26251/carapace?sslmode=disable" scripts/setup-schema.sh
 
 python3 -m carapace.cli demo          # novel -> hot -> warm walk-through
-scripts/shell-test-local.sh           # kill node 2 mid-read-loop, watch it survive
+scripts/shell-test-local.sh           # kill node 1 mid-read-loop, watch it fail over
 python3 benchmark/cache_hit_benchmark.py
 
 scripts/local-cluster.sh stop
@@ -194,7 +196,7 @@ Eight real problems hit while building this, each with the exact error and the a
 | Hot / warm / cold tiers | All three implemented and verified end-to-end against the live cluster, including real hot hits, real warm vector matches (0.505 measured distance), and cold-tier convention application. |
 | AWS Lambda write-back | Really deployed (`carapace-writeback`, `eu-central-1`), really invoked, write confirmed via the read-only role afterward -- not a local simulation dressed up as one. |
 | AWS Bedrock | Real Claude + Titan V2 calls against a live account, with a real fallback path exercised by a real enrollment gap. |
-| Shell Test -- local | Real: SIGKILL, 0 grace period, 0 failed reads across 36 probes, log committed. |
+| Shell Test -- local | Real: SIGKILL of node 1 (the client's primary host, not an idle one), 0 grace period, real failover to node 3 with 1 failed read out of 34 at the instant of the kill, recovered in ~5s, log committed. |
 | Shell Test -- CockroachDB Cloud | **Not run.** `ccloud cluster disruption` requires an Advanced-plan cluster and Cockroach Labs account-team enrollment; neither was reachable inside the deadline. Stated here directly rather than implied as done. |
 | Agent Skills Repo PR | Real and open: [cockroachlabs/cockroachdb-skills#24](https://github.com/cockroachlabs/cockroachdb-skills/pull/24). Not merged -- that's a maintainer decision, out of scope for this submission to control. |
 | Codebase context for full-miss reasoning | `DEMO_CONTEXT` in [`carapace/cli.py`](carapace/cli.py) is a fixed stand-in paragraph, not a live lookup against a real codebase. |

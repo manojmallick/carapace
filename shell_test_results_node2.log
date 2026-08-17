@@ -1,0 +1,45 @@
+Shell Test: starting continuous memory read loop (1 read/sec)...
+01:59:13 -- OK      39.7ms  rows=1  via_node=1
+01:59:14 -- OK      25.2ms  rows=1  via_node=1
+01:59:15 -- OK      21.4ms  rows=1  via_node=1
+01:59:16 -- OK      30.9ms  rows=1  via_node=1
+01:59:18 -- OK      21.0ms  rows=1  via_node=1
+01:59:19 -- OK      27.8ms  rows=1  via_node=1
+01:59:20 -- OK      24.5ms  rows=1  via_node=1
+
+01:59:21 -- Shell Test: SIGKILL node 2 (pid 72739). No drain, no grace.
+01:59:21 -- node 2 is dead. Reads continuing against nodes 1 and 3...
+01:59:21 -- OK      22.0ms  rows=1  via_node=1
+01:59:22 -- OK      21.8ms  rows=1  via_node=1
+01:59:24 -- OK      21.2ms  rows=1  via_node=1
+01:59:25 -- OK      26.9ms  rows=1  via_node=1
+01:59:26 -- OK      21.7ms  rows=1  via_node=1
+01:59:27 -- OK      24.4ms  rows=1  via_node=1
+01:59:28 -- OK      21.8ms  rows=1  via_node=1
+01:59:30 -- OK      21.8ms  rows=1  via_node=1
+01:59:31 -- OK      21.6ms  rows=1  via_node=1
+01:59:32 -- OK      21.1ms  rows=1  via_node=1
+01:59:33 -- OK      27.1ms  rows=1  via_node=1
+01:59:34 -- OK      68.5ms  rows=1  via_node=1
+01:59:36 -- OK      23.5ms  rows=1  via_node=1
+01:59:37 -- OK      21.3ms  rows=1  via_node=1
+01:59:38 -- OK      21.0ms  rows=1  via_node=1
+01:59:39 -- OK      21.6ms  rows=1  via_node=1
+01:59:41 -- OK      24.0ms  rows=1  via_node=1
+01:59:42 -- OK      22.2ms  rows=1  via_node=1
+01:59:43 -- OK      21.4ms  rows=1  via_node=1
+01:59:44 -- OK      21.4ms  rows=1  via_node=1
+01:59:45 -- 
+01:59:46 -- Shell Test: restarting node 2...
+OK      21.1ms  rows=1  via_node=1
+01:59:47 -- OK      26.7ms  rows=1  via_node=1
+01:59:48 -- OK      20.9ms  rows=1  via_node=1
+01:59:49 -- OK      20.8ms  rows=1  via_node=1
+01:59:50 -- OK      21.4ms  rows=1  via_node=1
+01:59:52 -- OK      26.9ms  rows=1  via_node=1
+01:59:53 -- OK      28.9ms  rows=1  via_node=1
+01:59:54 -- OK      25.4ms  rows=1  via_node=1
+01:59:55 -- OK      26.0ms  rows=1  via_node=1
+01:59:56 -- OK      28.8ms  rows=1  via_node=1
+
+Shell Test complete: 36 probe reads, 0 failed. Full log: shell_test_results.log

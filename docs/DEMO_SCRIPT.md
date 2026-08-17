@@ -47,8 +47,8 @@ python3 -m carapace.cli demo
 
 ## [0:50-1:35] THE SHELL TEST, LIVE
 
-**Say:** "Now the actual test -- kill a real cluster node while the memory
-keeps getting read from."
+**Say:** "Now the actual test -- kill the exact node the client is connected
+to, not a spare one, while the memory keeps getting read from."
 
 **Run, live:**
 ```bash
@@ -56,11 +56,14 @@ scripts/shell-test-local.sh
 ```
 
 **Narrate as it runs:** point at the terminal the moment the SIGKILL line
-prints (`Shell Test: SIGKILL node 2 (pid ...). No drain, no grace.`) and keep
-narrating over the read-loop continuing underneath it -- don't cut away.
+prints (`Shell Test: SIGKILL node 1 (pid ...). No drain, no grace.`). The very
+next read will actually FAIL -- let it show, don't cut away. Then narrate the
+next line succeeding via a different node.
 
-**Say once it finishes:** "Zero failed reads. Not assumed -- that's the real
-log, and it's committed in the repo at `shell_test_results.log`."
+**Say once it finishes:** "One failed read, right at the instant the node
+died -- and the very next read, five seconds later, came back from a
+different node. That's real failover, not a suspiciously clean zero. It's
+all in the committed log at `shell_test_results.log`."
 
 ## [1:35-2:00] THE NUMBERS
 
