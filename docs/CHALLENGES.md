@@ -96,6 +96,56 @@ operation. Running it against the live cluster requires `ccloud auth
 login`, an org-level browser OAuth flow that cannot be completed
 non-interactively -- this is queued as a manual pre-demo step.
 
+## Challenge 6: Lambda's execution environment has no default CA cert path
+
+**What we assumed:** deploying `writeback_handler.py` to Lambda with
+just `CARAPACE_DB_WRITE_URL` set would connect the same way local
+`psycopg` connections did once `~/.postgresql/root.crt` existed
+locally.
+
+**What actually happened:** the first real invoke failed with
+`root certificate file "/home/sbx_user1051/.postgresql/root.crt" does
+not exist` -- Lambda's execution environment has no home directory
+psycopg can default into, so `sslmode=verify-full` had nothing to
+verify against.
+
+**The fix:** bundled CockroachDB Cloud's CA cert directly into the
+deployment zip (`scripts/deploy-lambda.sh` now copies
+`~/.postgresql/root.crt` into `build/`) and set `PGSSLROOTCERT=
+/var/task/root.crt` as a Lambda environment variable, which libpq
+(and therefore psycopg) reads directly. Verified with a real
+synchronous `aws lambda invoke` against the live cluster: the row
+appeared in both `semantic_cache` and `query_memory`, confirmed via
+the read-only `carapace_reader` role afterward.
+
+## Challenge 7: `ccloud cluster disruption` is gated per-organization
+
+**What we assumed:** once `ccloud auth login` succeeded, `ccloud
+cluster disruption set` would work against the live cluster the same
+way it worked in `--help`.
+
+**What actually happened:** `ccloud cluster nodes <name>` and `ccloud
+cluster disruption get <name>` both failed -- first with "unable to
+find a cluster" using the routing ID as the name (the actual cluster
+name is `cotton-bigfoot`, the id `7c1adba4-...`; the routing ID
+`cotton-bigfoot-19571` is a serverless-specific DNS label, not a valid
+`ccloud` identifier). Once the right identifier was used, the real
+error surfaced: `{"code": 7, "message": "Cluster disruption is not
+enabled for this organization"}` (403). The cluster itself is also
+Serverless (`plan: BASIC`, `node_count: 0` in `ccloud cluster list
+-o json`), which explains why `ccloud cluster nodes` -- documented as
+"List nodes for a **dedicated** cluster" -- had nothing to list in the
+first place: Serverless is multi-tenant and doesn't expose individual
+node/pod identity to the customer at all.
+
+**Where this stands:** node-level chaos-testing via `ccloud` is not
+available against this cluster under this org's current entitlements,
+regardless of the script. The Shell Test's evidence for this
+submission comes from the real local 3-node cluster run below (0
+failures across 37 probes, real SIGKILL, no drain, no grace period) --
+reported honestly as local-cluster evidence, not claimed as a cloud
+result it isn't.
+
 ## Shell Test result (real run, local 3-node cluster, `2026-08-18`)
 
 37 read-loop probes across the full kill/recovery window, SIGKILL'd node
