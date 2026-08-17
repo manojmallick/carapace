@@ -46,11 +46,11 @@ outcome, and latency.
 
 ## Production readiness, verified not asserted
 
-`scripts/shell-test.sh` (CockroachDB Cloud, via ccloud CLI node
-drain/stop) and `scripts/shell-test-local.sh` (real local 3-node
-cluster, SIGKILL) kill a cluster node mid-session while a 1/sec
-read-loop probe runs continuously. See `shell_test_results.log` for the
-actual output of a real run -- including which gateway node served each
+`scripts/shell-test.sh` (CockroachDB Cloud, via `ccloud cluster
+disruption set/clear`) and `scripts/shell-test-local.sh` (real local
+3-node cluster, SIGKILL) disrupt a cluster node mid-session while a
+1/sec read-loop probe runs continuously. See `shell_test_results.log`
+for the actual output of a real run -- including which gateway node served each
 read, so you can watch traffic move to the survivors.
 
 ## CockroachDB tools used

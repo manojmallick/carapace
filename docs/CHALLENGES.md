@@ -74,6 +74,28 @@ query (`carapace/read_probe.py`). The application's real reads
 (`carapace/reader.py`) never touch `crdb_internal` and needed no
 change.
 
+## Challenge 5: `ccloud cluster node drain/stop/start` doesn't exist
+
+**What we assumed:** the ccloud CLI would expose `node drain`, `node
+stop`, and `node start` subcommands under `ccloud cluster` for the
+Shell Test, matching an earlier draft of this script written before
+the CLI was actually installed.
+
+**What actually happened:** `ccloud cluster --help` on the installed
+`ccloud 0.8.23` lists no `node` subcommand at all -- only `nodes`
+(read-only listing). The real chaos-testing surface CockroachDB Cloud
+ships is `ccloud cluster disruption set/get/clear`, which disrupts a
+named pod or an entire region/AZ directly.
+
+**The fix:** rewrote `scripts/shell-test.sh` around `ccloud cluster
+disruption set <cluster> --region <region> --pods <pod>` /
+`disruption clear`, which is arguably a better fit than the imagined
+drain/stop/start sequence -- it's the officially supported
+disaster-recovery testing primitive, not a repurposed maintenance
+operation. Running it against the live cluster requires `ccloud auth
+login`, an org-level browser OAuth flow that cannot be completed
+non-interactively -- this is queued as a manual pre-demo step.
+
 ## Shell Test result (real run, local 3-node cluster, `2026-08-18`)
 
 37 read-loop probes across the full kill/recovery window, SIGKILL'd node
