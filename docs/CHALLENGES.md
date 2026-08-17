@@ -140,11 +140,21 @@ node/pod identity to the customer at all.
 
 **Where this stands:** node-level chaos-testing via `ccloud` is not
 available against this cluster under this org's current entitlements,
-regardless of the script. The Shell Test's evidence for this
-submission comes from the real local 3-node cluster run below (0
-failures across 37 probes, real SIGKILL, no drain, no grace period) --
-reported honestly as local-cluster evidence, not claimed as a cloud
-result it isn't.
+regardless of the script. Checked further: `cluster disruption` is
+gated to CockroachDB **Advanced**-plan clusters specifically (not
+available on Basic/Serverless or Standard/Provisioned), and even on
+Advanced, Cockroach Labs' own docs state the org must be explicitly
+enrolled by an account team before the feature activates -- it isn't
+self-service on any plan tier. On a hackathon deadline, an Advanced
+cluster ($476/mo, exceeding the trial credit) bought nothing but the
+*chance* of enrollment landing in time, with no guarantee. Decision:
+don't chase it. The Shell Test's evidence for this submission comes
+from the real local 3-node cluster run below (0 failures across 37
+probes, real SIGKILL, no drain, no grace period) -- reported honestly
+as local-cluster evidence, not claimed as a cloud result it isn't. The
+live CockroachDB Cloud cluster is real and fully wired for everything
+else (schema, roles, MCP, Lambda write-back, Bedrock reasoning) --
+only the node-kill demonstration runs locally instead.
 
 ## Shell Test result (real run, local 3-node cluster, `2026-08-18`)
 

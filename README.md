@@ -55,9 +55,10 @@ read, so you can watch traffic move to the survivors.
 
 ## CockroachDB tools used
 
-MCP Server (read-only agent memory access), Distributed Vector Indexing
-(warm tier), ccloud CLI (provisioning + Shell Test), Agent Skills Repo
-(contribution in `skills-contribution/cockroachdb-agent-memory/`).
+MCP Server (read-only agent memory access, `.mcp.json`), Distributed
+Vector Indexing (warm tier), ccloud CLI (auth + Shell Test), Agent
+Skills Repo (real PR, open:
+[cockroachlabs/cockroachdb-skills#24](https://github.com/cockroachlabs/cockroachdb-skills/pull/24)).
 
 ## AWS services used
 
