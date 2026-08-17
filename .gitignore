@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+.local-cluster/
+lambda/build/
+lambda/writeback.zip
+carapace_audit.jsonl
+.env

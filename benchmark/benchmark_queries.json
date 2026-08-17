@@ -1,0 +1,22 @@
+[
+  "How should I handle errors in this service?",
+  "Where do I add a new endpoint for refunds?",
+  "How should I handle errors in this service?",
+  "What's the right way to deal with exceptions in this API?",
+  "How do we do input validation on request bodies?",
+  "Where do I add a new endpoint for refunds?",
+  "How should request body validation be done here?",
+  "What's our convention for logging in this codebase?",
+  "How do I add a refund endpoint to the API?",
+  "How should I handle errors in this service?",
+  "What logging approach does this project use?",
+  "How do we paginate list endpoints?",
+  "What's the right way to deal with exceptions in this API?",
+  "How should list endpoints implement pagination?",
+  "How do we handle database migrations?",
+  "What's our convention for logging in this codebase?",
+  "How are schema migrations managed in this project?",
+  "How do we do input validation on request bodies?",
+  "How do I write a test for a new endpoint?",
+  "How should I handle errors in this service?"
+]

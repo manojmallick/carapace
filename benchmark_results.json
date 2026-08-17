@@ -1,0 +1,11 @@
+{
+  "total_queries": 20,
+  "hot_hit_rate": 0.35,
+  "warm_hit_rate": 0.4,
+  "cold_hit_rate": 0.0,
+  "full_miss_rate": 0.25,
+  "llm_calls_avoided": 15,
+  "avg_latency_ms": 597.9,
+  "p50_latency_ms": 301.8,
+  "p95_latency_ms": 2601.4
+}
