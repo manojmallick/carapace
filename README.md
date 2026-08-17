@@ -21,7 +21,6 @@ A carapace is the hard shell that lets an organism survive things that would oth
 - [Benchmark](#benchmark)
 - [CockroachDB tools used](#cockroachdb-tools-used)
 - [AWS services used](#aws-services-used)
-- [Codebase context and SigMap](#codebase-context-and-sigmap)
 - [Quick start](#quick-start)
 - [Project structure](#project-structure)
 - [Real challenges, not staged ones](#real-challenges-not-staged-ones)
@@ -133,12 +132,6 @@ All four, not the minimum two required:
 - **Amazon Bedrock** -- Claude (`eu.anthropic.claude-haiku-4-5-*`, cross-region inference profile) for full-miss reasoning, with a same-call fallback to `eu.amazon.nova-pro-v1:0` if Claude's enrollment lags (a real resilience property discovered by hitting the failure it protects against -- see Challenge 1). Titan V2 for embeddings.
 - **AWS Lambda** -- `carapace-writeback`, a real deployed function (not a local simulation) holding the only write-capable database credential, invoked asynchronously on every full miss. Verified with a real synchronous `aws lambda invoke`: the row appeared in both `semantic_cache` and `query_memory`, confirmed afterward through the read-only role. `scripts/deploy-lambda.sh` packages and deploys it, including bundling CockroachDB Cloud's CA certificate directly into the zip (Challenge 6 -- Lambda's execution environment has no home directory for the default cert lookup).
 
-## Codebase context and SigMap
-
-In the full architecture, the context fed to Bedrock's full-miss reasoning step (Section 2 of the original design) is meant to come from ranked, relevant codebase context -- not a hand-written string. This demo's `DEMO_CONTEXT` in [`carapace/cli.py`](carapace/cli.py) is a stand-in for that: a fixed paragraph describing a fictional `payments-api` service, used so the demo is reproducible without depending on a specific target repository.
-
-The real tool for that job is **[SigMap](https://github.com/manojmallick/sigmap-codex-bridge)** -- specifically, [`sigmap-codex-bridge`](https://github.com/manojmallick/sigmap-codex-bridge), a separate project by the same author built for OpenAI Build Week 2026, which measures (not assumes) whether SigMap-ranked repository context changes an agent's task outcomes, with retained evidence and reproducible A/B runs rather than a single favorable demo. It's built for the Codex CLI specifically and isn't wired into Carapace's Bedrock call in this repository -- worth stating plainly rather than implying an integration that doesn't exist yet. The natural extension: replace `DEMO_CONTEXT` with `sigmap ask <query> --top 8` output against the target repository before the full-miss `bedrock.reason()` call, so the cold-miss path is grounded in the actual codebase rather than a fixed paragraph.
-
 ## Quick start
 
 ```bash
@@ -204,7 +197,7 @@ Eight real problems hit while building this, each with the exact error and the a
 | Shell Test -- local | Real: SIGKILL, 0 grace period, 0 failed reads across 36 probes, log committed. |
 | Shell Test -- CockroachDB Cloud | **Not run.** `ccloud cluster disruption` requires an Advanced-plan cluster and Cockroach Labs account-team enrollment; neither was reachable inside the deadline. Stated here directly rather than implied as done. |
 | Agent Skills Repo PR | Real and open: [cockroachlabs/cockroachdb-skills#24](https://github.com/cockroachlabs/cockroachdb-skills/pull/24). Not merged -- that's a maintainer decision, out of scope for this submission to control. |
-| SigMap codebase-context integration | **Not wired in.** `DEMO_CONTEXT` is a fixed stand-in string; see [Codebase context and SigMap](#codebase-context-and-sigmap) for what the real integration would look like. |
+| Codebase context for full-miss reasoning | `DEMO_CONTEXT` in [`carapace/cli.py`](carapace/cli.py) is a fixed stand-in paragraph, not a live lookup against a real codebase. |
 | Demo video | Not yet recorded. |
 
 ## License
