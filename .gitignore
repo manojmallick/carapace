@@ -6,3 +6,4 @@ lambda/build/
 lambda/writeback.zip
 carapace_audit.jsonl
 .env
+CARAPACE_COCKROACHDB_PLAN.md
