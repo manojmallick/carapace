@@ -156,12 +156,36 @@ live CockroachDB Cloud cluster is real and fully wired for everything
 else (schema, roles, MCP, Lambda write-back, Bedrock reasoning) --
 only the node-kill demonstration runs locally instead.
 
+## Challenge 8: local write-back's daemon thread can die before it writes
+
+**What we assumed:** `CARAPACE_LOCAL_WRITEBACK=1`'s dev-convenience path
+(`writeback.py: _dispatch_local`, a daemon thread standing in for the
+real Lambda) would reliably complete its write shortly after
+`carapace.cli ask` printed its response and exited.
+
+**What actually happened:** a first Shell Test run showed `rows=0`
+across every single probe -- the table was empty. `ask` is a one-shot
+process: it prints the response and exits immediately, and daemon
+threads do not keep a process alive, so the background write was
+killed mid-flight before it reached CockroachDB.
+
+**The fix:** this is specific to the local dev fallback, not the real
+architecture -- the actual `aws lambda invoke` write-back path has no
+such lifecycle dependency, since the Lambda's own process is what
+stays alive until the write completes. For local runs, use
+`carapace.cli demo`, which sleeps in-process between queries and so
+lets the same daemon thread finish before the process exits; the Shell
+Test log below was captured after populating memory this way, and
+shows `rows=1` throughout -- real data, not an empty table.
+
 ## Shell Test result (real run, local 3-node cluster, `2026-08-18`)
 
-37 read-loop probes across the full kill/recovery window, SIGKILL'd node
-2 with no drain and no grace period. **0 failed reads.** Full log:
-`shell_test_results.log`. Latency stayed in the 20-30ms band throughout,
-including the instant of the kill -- unsurprising given the client's
-multi-host connection string kept it pinned to node 1, which was never
-touched; the meaningful result is that killing a node outright caused
-zero read failures, not a latency story.
+36 read-loop probes across the full kill/recovery window, SIGKILL'd node
+2 with no drain and no grace period, against a table populated with a
+real memory row (see Challenge 8 above -- an earlier run against an
+empty table is not what's reported here). **0 failed reads.** Full log
+committed at `shell_test_results.log`. Latency stayed in the 20-30ms
+band throughout, including the instant of the kill -- unsurprising
+given the client's multi-host connection string kept it pinned to node
+1, which was never touched; the meaningful result is that killing a
+node outright caused zero read failures, not a latency story.
