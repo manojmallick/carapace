@@ -88,10 +88,14 @@ Documented in full, with the exact error messages, in
 ## Accomplishments that we're proud of
 
 - A real, committed log of a cluster node dying and the memory layer
-  surviving it -- not a claim.
+  failing over -- not a claim.
 - All 4 CockroachDB tools used with genuine purpose, not the minimum 2.
 - A real PR open against CockroachDB's own Agent Skills Repo, validated with
   their own tooling before submission.
+- A **measured 70% reduction in real Bedrock cost**, computed from the exact
+  token counts Bedrock billed on every call (not an estimated token count) --
+  the same instrumentation also caught a live model-enrollment hiccup
+  mid-benchmark and confirmed the Nova fallback kicked in correctly.
 - Every number in the README was measured on this build today -- no recycled
   benchmarks from other projects.
 
@@ -113,7 +117,7 @@ not by reading the docs.
 ## Built With
 
 cockroachdb, cockroachdb-cloud, aws-bedrock, aws-lambda, python, psycopg,
-distributed-vector-indexing, mcp, ccloud-cli
+distributed-vector-indexing, mcp, ccloud-cli, pytest, github-actions
 
 ## Try it out
 

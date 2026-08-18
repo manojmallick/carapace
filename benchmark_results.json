@@ -1,11 +1,24 @@
 {
   "total_queries": 20,
-  "hot_hit_rate": 0.35,
+  "hot_hit_rate": 0.3,
   "warm_hit_rate": 0.4,
   "cold_hit_rate": 0.0,
-  "full_miss_rate": 0.25,
-  "llm_calls_avoided": 15,
-  "avg_latency_ms": 597.9,
-  "p50_latency_ms": 301.8,
-  "p95_latency_ms": 2601.4
+  "full_miss_rate": 0.3,
+  "llm_calls_avoided": 14,
+  "avg_latency_ms": 650.2,
+  "p50_latency_ms": 339.2,
+  "p95_latency_ms": 2540.7,
+  "real_cost": {
+    "total_queries": 20,
+    "reasoning_calls": 6,
+    "reasoning_input_tokens": 489,
+    "reasoning_output_tokens": 282,
+    "reasoning_cost_usd": 0.001294,
+    "embed_calls": 14,
+    "embed_input_tokens": 149,
+    "embed_cost_usd": 3e-06,
+    "actual_total_cost_usd": 0.001297,
+    "no_memory_baseline_cost_usd": 0.004316,
+    "cost_reduction_pct": 70.0
+  }
 }

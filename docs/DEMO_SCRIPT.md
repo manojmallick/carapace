@@ -70,9 +70,11 @@ all in the committed log at `shell_test_results.log`."
 **Show:** `cat benchmark_results.json` (or have it already open in an editor
 tab) while narrating:
 
-**Say:** "75% of queries in this run were served straight from memory -- 35%
-exact hits, 40% semantic matches -- avoiding 15 of 20 possible calls to
-Bedrock. These are fresh numbers from this build, not a recycled benchmark."
+**Say:** "70% of queries in this run were served straight from memory -- 30%
+exact hits, 40% semantic matches -- avoiding 14 of 20 possible calls to
+Bedrock. And this isn't an estimate: the real token count Bedrock billed on
+every single call is logged and turned into a real dollar figure -- a
+measured 70% cost reduction, tracking the real hit rate exactly."
 
 ## [2:00-2:25] THE READ-ONLY BOUNDARY
 

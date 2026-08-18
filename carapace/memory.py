@@ -25,18 +25,21 @@ class CarapaceMemory:
         if hot:
             return {"tier": "hot", "response": hot["response"], "query_hash": qh}
 
-        # WARM: vector recall over past query embeddings.
+        # WARM: vector recall over past query embeddings. Every non-hot
+        # query pays for one embedding call regardless of hit/miss below.
         t0 = time.time()
-        embedding = bedrock.embed(query_text)
+        embed_result = bedrock.embed(query_text)
+        embedding = embed_result["embedding"]
         candidates = self.reader.check_warm_memory(embedding)
         best = candidates[0] if candidates else None
         warm_hit = best is not None and best["distance"] <= config.WARM_DISTANCE_THRESHOLD
+        distance_detail = f"best_distance={best['distance']:.4f}" if best else "no candidates"
         self.audit.record(
             "warm",
             "hit" if warm_hit else "miss",
             (time.time() - t0) * 1000,
             qh,
-            detail=f"best_distance={best['distance']:.4f}" if best else "no candidates",
+            detail=f"{distance_detail} embed_input_tokens={embed_result['input_tokens']}",
         )
         if warm_hit:
             return {
@@ -58,8 +61,16 @@ class CarapaceMemory:
         # back asynchronously via Lambda -- never through self.reader,
         # which structurally cannot write.
         t0 = time.time()
-        response = bedrock.reason(query_text, context, conventions)
-        self.audit.record("bedrock", "ok", (time.time() - t0) * 1000, qh)
+        reason_result = bedrock.reason(query_text, context, conventions)
+        response = reason_result["text"]
+        self.audit.record(
+            "bedrock", "ok", (time.time() - t0) * 1000, qh,
+            detail=(
+                f"model={reason_result['model_id']} "
+                f"input_tokens={reason_result['input_tokens']} "
+                f"output_tokens={reason_result['output_tokens']}"
+            ),
+        )
 
         t0 = time.time()
         outcome = dispatch_writeback({
@@ -68,7 +79,7 @@ class CarapaceMemory:
             "query_text": query_text,
             "response": response,
             "embedding": embedding,
-            "model_id": config.BEDROCK_MODEL_ID,
+            "model_id": reason_result["model_id"],
         })
         self.audit.record("writeback", outcome, (time.time() - t0) * 1000, qh)
 

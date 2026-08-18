@@ -15,6 +15,7 @@ import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from carapace import cost  # noqa: E402
 from carapace.cli import DEMO_CONTEXT  # noqa: E402
 from carapace.memory import CarapaceMemory  # noqa: E402
 
@@ -52,7 +53,13 @@ if __name__ == "__main__":
     with open(os.path.join(os.path.dirname(__file__), "benchmark_queries.json")) as f:
         queries = json.load(f)
 
+    audit_log = os.path.join(os.path.dirname(__file__), "..", "carapace_audit.jsonl")
+    if os.path.exists(audit_log):
+        os.remove(audit_log)  # cost summary below reads this run's calls only
+
     results = run_benchmark(queries, CarapaceMemory())
+    results["real_cost"] = cost.summarize(audit_log)
+
     out = os.path.join(os.path.dirname(__file__), "..", "benchmark_results.json")
     with open(out, "w") as f:
         json.dump(results, f, indent=2)

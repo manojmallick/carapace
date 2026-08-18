@@ -16,17 +16,26 @@ def _client():
     return _runtime
 
 
-def embed(text: str) -> list:
+def embed(text: str) -> dict:
+    """Returns {"embedding": list, "input_tokens": int} -- the real token
+    count Bedrock billed for this call, not an estimate."""
     body = json.dumps({
         "inputText": text,
         "dimensions": config.EMBED_DIMENSIONS,
         "normalize": True,
     })
     resp = _client().invoke_model(modelId=config.EMBED_MODEL_ID, body=body)
-    return json.loads(resp["body"].read())["embedding"]
+    parsed = json.loads(resp["body"].read())
+    return {
+        "embedding": parsed["embedding"],
+        "input_tokens": parsed["inputTextTokenCount"],
+    }
 
 
-def reason(query: str, context: str = "", conventions: list = None) -> str:
+def reason(query: str, context: str = "", conventions: list = None) -> dict:
+    """Returns {"text": str, "model_id": str, "input_tokens": int,
+    "output_tokens": int} -- real usage from whichever model actually
+    served the call, Claude or the Nova fallback."""
     system = (
         "You are a senior engineer answering questions about a codebase. "
         "Be concrete and brief."
@@ -48,7 +57,13 @@ def reason(query: str, context: str = "", conventions: list = None) -> str:
                 messages=[{"role": "user", "content": [{"text": user}]}],
                 inferenceConfig={"maxTokens": 1024},
             )
-            return resp["output"]["message"]["content"][0]["text"]
+            usage = resp["usage"]
+            return {
+                "text": resp["output"]["message"]["content"][0]["text"],
+                "model_id": model_id,
+                "input_tokens": usage["inputTokens"],
+                "output_tokens": usage["outputTokens"],
+            }
         except Exception as exc:  # noqa: BLE001
             last_exc = exc
     raise last_exc
