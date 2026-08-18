@@ -32,7 +32,7 @@ A carapace is the hard shell that lets an organism survive things that would oth
 
 Most "agent memory on a database" submissions demonstrate storage: write a row, read it back, done. That proves the database exists. It doesn't prove the memory layer survives the thing CockroachDB is actually built for -- a node going down mid-query. The hackathon's Production Readiness criterion asks explicitly about "resilience, access control, and what happens when things go wrong." Carapace answers that with a script that kills a real node and a committed log of the result, not a claim about CockroachDB's general reputation.
 
-The 70% LLM-call-reduction number from a SHA-based dual-key semantic cache built in production at ING is real, but it belongs to different infrastructure entirely -- citing it directly for Carapace would be the kind of recycled benchmark that doesn't hold up under scrutiny. Every number in this README was measured on this build, against a real cluster, today. See [Benchmark](#benchmark).
+The 70% LLM-call-reduction number from a SHA-based dual-key semantic cache built in production at ING is real, but it belongs to different infrastructure entirely -- citing it directly for Carapace would be the kind of recycled benchmark that doesn't hold up under scrutiny. Every number in this README was measured on this build, against a real cluster, today -- including its own, separately-measured 70% (see [Benchmark](#benchmark)), which lands on the same figure by coincidence, not by reuse.
 
 ## The pattern
 
@@ -222,7 +222,8 @@ Nine real problems hit while building this, each with the exact error and the ac
 | Shell Test -- CockroachDB Cloud | **Not run.** `ccloud cluster disruption` requires an Advanced-plan cluster and Cockroach Labs account-team enrollment; neither was reachable inside the deadline. Stated here directly rather than implied as done. |
 | Agent Skills Repo PR | Real and open: [cockroachlabs/cockroachdb-skills#24](https://github.com/cockroachlabs/cockroachdb-skills/pull/24). Not merged -- that's a maintainer decision, out of scope for this submission to control. |
 | Codebase context for full-miss reasoning | `DEMO_CONTEXT` in [`carapace/cli.py`](carapace/cli.py) is a fixed stand-in paragraph, not a live lookup against a real codebase. |
-| Demo video | Not yet recorded. |
+| Demo video | Script ready at [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) -- not yet recorded. |
+| Devpost submission | Draft ready at [`docs/DEVPOST_SUBMISSION.md`](docs/DEVPOST_SUBMISSION.md) -- not yet filed. |
 
 ## License
 
